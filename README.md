@@ -11,6 +11,13 @@
 
 </div>
 
+<div align="center">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="Figures/cinta_logo_white.png">
+        <img src="Figures/cinta_logo.png" alt="logo do cinta" width="300">
+    </picture>
+</div>
+
 ## overview
 
 cinta é uma **família de modelos de ia de voz de código aberto de ponta** que inclui modelos de conversão de texto em fala (tts) e de reconhecimento automático de fala (asr)
