@@ -1,0 +1,180 @@
+# inicialmente obtido pelo arquivo .gitignore do python do github
+
+# compilados em byte / otimizados / arquivos dll
+__pycache__/
+*.py[cod]
+*$py.class
+
+# extensões c
+*.so
+
+# testes e logs
+tests/fixtures/cached_*_text.txt
+logs/
+lightning_logs/
+lang_code_data/
+
+# distribuição/packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# pyinstaller
+#
+# normalmente, esses arquivos são criados por um script python a 
+# partir de um modelo antes que o pyinstaller construa o executável,
+# para inserir dados e outras informações nele
+*.manifest
+*.spec
+
+# logs de instalador
+pip-log.txt
+pip-delete-this-directory.txt
+
+# teste unitário/reports de cobertura
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# traduções
+*.mo
+*.pot
+
+# coisas do django
+*.log
+local_settings.py
+db.sqlite3
+
+# coisas do flask
+instance/
+.webassets-cache
+
+# coisas do scrapy
+.scrapy
+
+# documentação sphinx
+docs/_build/
+
+# pybuilder
+target/
+
+# jupyter notebook
+.ipynb_checkpoints
+
+# ipython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# arquivo de cronograma de batida de aipo
+celerybeat-schedule
+
+# arquivos analisados pelo sagemath
+*.sage.py
+
+# ambientes
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# configurações de projeto spyder
+.spyderproject
+.spyproject
+
+# configurações de projeto rope
+.ropeproject
+
+# documentação mkdocs
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# verificador de tipo pyre
+.pyre/
+
+# vscode
+.vs
+.vscode
+
+# pycharm
+.idea
+
+# código tf
+tensorflow_code
+
+# modelos
+proc_data
+
+# exemplos
+runs
+/runs_old
+/wandb
+/examples/runs
+/examples/**/*.args
+/examples/rag/sweep
+
+# dados
+/data
+serialization_dir
+
+# emacs
+*.*~
+debug.env
+
+# vim
+.*.swp
+
+# ctags
+tags
+
+# pré-commit
+.pre-commit*
+
+# .lock
+*.lock
+
+# ds_store (macos)
+.DS_Store
+
+# ruff
+.ruff_cache
+
+# projeto
+/output/
+/outputs/
+/checkpoint/
+/checkpoints/
+exp
+.gradio/
+experimental_voices
