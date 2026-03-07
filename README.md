@@ -2,12 +2,12 @@
 
 # cinta: ai de voz open-source
 
-[![página do projeto](https://img.shields.io/badge/projeto-página-blue?logo=githubpages)](https://microsoft.github.io/VibeVoice)
+<!-- [![página do projeto](https://img.shields.io/badge/projeto-página-blue?logo=githubpages)](https://microsoft.github.io/VibeVoice)
 [![hugging face](https://img.shields.io/badge/huggingface-coleção-orange?logo=huggingface)](https://huggingface.co/collections/microsoft/vibevoice-68a2ef24a875c44be47b034f)
 [![report tts](https://img.shields.io/badge/tts-report-red?logo=arxiv)](https://arxiv.org/pdf/2508.19205)
 [![report asr](https://img.shields.io/badge/asr-report-yellow?logo=arxiv)](https://arxiv.org/pdf/2601.18184)
 [![colab](https://img.shields.io/badge/streamingtts-colab-green?logo=googlecolab)](https://colab.research.google.com/github/microsoft/VibeVoice/blob/main/demo/VibeVoice_colab.ipynb)
-[![playground asr](https://img.shields.io/badge/asr-playground-6F42C1?logo=gradio)](https://aka.ms/vibevoice-asr)
+[![playground asr](https://img.shields.io/badge/asr-playground-6F42C1?logo=gradio)](https://aka.ms/vibevoice-asr) -->
 
 </div>
 
