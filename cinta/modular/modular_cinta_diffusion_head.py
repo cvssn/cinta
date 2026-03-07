@@ -112,8 +112,8 @@ class FeedForwardNetwork(nn.Module):
     rede feedforward padrão com ativação swiglu.
     
     args:
-        embed_dim (`int`): dimensão de entrada
-        ffn_dim (`int`): dimensão escondida
+        embed_dim (`int`): dimensão de entrada.
+        ffn_dim (`int`): dimensão escondida.
     """
     
     def __init__(
@@ -135,7 +135,7 @@ class FeedForwardNetwork(nn.Module):
         up = self.up_proj(x)
         
         # ativação swiglu
-        # gate = F.silu(gate)
+        # gate = f.silu(gate)
         gate = self.act_fn(gate)
         
         return self.down_proj(gate * up)
@@ -146,10 +146,10 @@ class HeadLayer(nn.Module):
     uma camada na cabeça de difusão.
     
     args:
-        embed_dim (`int`): dimensão de entrada
-        ffn_dim (`int`): dimensão escondida
-        cond_dim (`int`): dimensão de embedding condicional
-        norm_eps (`float`, opcional): épsilon para normalização
+        embed_dim (`int`): dimensão de entrada.
+        ffn_dim (`int`): dimensão escondida.
+        cond_dim (`int`): dimensão de embedding condicional.
+        norm_eps (`float`, opcional): épsilon para normalização.
     """
     
     def __init__(
@@ -185,5 +185,139 @@ class HeadLayer(nn.Module):
     
 class FinalLayer(nn.Module):
     """
+    camada final na cabeça de difusão.
     
+    args:
+        hidden_size (`int`): dimensão de entrada.
+        output_size (`int`): dimensão de saída.
+        cond_size (`int`): dimensão de incorporação da condição.
+        norm_eps (`float`, opcional): épsilon para normalização.
     """
+    
+    def __init__(self, hidden_size, output_size, cond_size, norm_eps=1e-5):
+        super().__init__()
+        
+        self.norm_final = RMSNorm(hidden_size, eps=norm_eps, elementwise_affine=False)
+        self.linear = nn.Linear(hidden_size, output_size, bias=False)
+        
+        self.adaLN_modulation = nn.Sequential(
+            # nn.SiLU(),
+            ACT2FN['silu'],
+            nn.Linear(cond_size, 2 * hidden_size, bias=False)
+        )
+
+    def forward(self, x, c):
+        shift, scale = self.adaLN_modulation(c).chunk(2, dim=-1)
+        
+        x = modulate(self.norm_final(x), shift, scale)
+        x = self.linear(x)
+        
+        return x
+    
+    
+class CintaDiffusionHead(PreTrainedModel):
+    """
+    modelo de cabeçote de difusão para cinta.
+    
+    args:
+        config (`CintaDiffusionHeadConfig`): configuração de modelo.
+        latent_size (`int`, opcional): tamanho do espaço latente. se não for fornecido, utiliza `config.latent_size`.
+    """
+    
+    config_class = CintaDiffusionHeadConfig
+    supports_gradient_checkpointing = True
+    _supports_flash_attn_2 = True
+    _supports_sdpa = True
+    
+    def __init__(
+        self,
+        
+        config
+    ):
+        super().__init__(config)
+        
+        self.config = config
+        self.cond_dim = config.hidden_size
+        latent_size = config.latent_size
+        
+        self.noisy_images_proj = nn.Linear(latent_size, config.hidden_size, bias=False)
+        self.cond_proj = nn.Linear(config.hidden_size, self.cond_dim, bias=False)
+        self.t_embedder = TimestepEmbedder(self.cond_dim)
+        
+        ffn_dim = int(config.hidden_size * config.head_ffn_ratio)
+        
+        # cria as camadas intermediárias
+        self.layers = nn.ModuleList([
+            HeadLayer(
+                embed_dim=config.hidden_size,
+                ffn_dim=ffn_dim,
+                cond_dim=self.cond_dim,
+                norm_eps=config.rms_norm_eps
+            )
+            
+            for _ in range(config.head_layers)
+        ])
+        
+        # camada final para saída
+        self.final_layer = FinalLayer(
+            hidden_size=config.hidden_size, 
+            output_size=latent_size,
+            cond_size=self.cond_dim,
+            norm_eps=config.rms_norm_eps
+        )
+        
+        self.initialize_weights()
+
+    def initialize_weights(self):
+        """inicializa os pesos do modelo."""
+        
+        # inicializa o incorporador de passo de tempo
+        nn.init.normal_(self.t_embedder.mlp[0].weight, std=0.02)
+        nn.init.normal_(self.t_embedder.mlp[2].weight, std=0.02)
+
+        # camadas de modulação adaln zeradas
+        for layer in self.layers:
+            nn.init.constant_(layer.adaLN_modulation[-1].weight, 0)
+
+        # camadas de saída zeradas
+        nn.init.constant_(self.final_layer.adaLN_modulation[-1].weight, 0)
+        nn.init.constant_(self.final_layer.linear.weight, 0)
+
+    def forward(
+        self,
+        
+        noisy_images,
+        timesteps,
+        condition
+    ):
+        """
+        passe para frente da cabeça de previsão.
+        
+        args:
+            noisy_images (`torch.tensor`): imagens ruidosas/latentes para remover ruído.
+            timesteps (`torch.tensor`): etapas de tempo para difusão.
+            condition (`torch.tensor`): informações de condicionamento.
+            
+        returna:
+            `torch.tensor`: o ruído/velocidade previsto.
+        """
+        
+        x = self.noisy_images_proj(noisy_images)
+        t = self.t_embedder(timesteps)
+        
+        condition = self.cond_proj(condition)
+        c = condition + t
+        
+        for layer in self.layers:
+            x = layer(x, c)
+            
+        x = self.final_layer(x, c)
+        
+        return x
+
+
+AutoModel.register(CintaDiffusionHeadConfig, CintaDiffusionHead)
+
+__all__ = [
+    "CintaDiffusionHead"
+]
